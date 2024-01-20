@@ -1,0 +1,108 @@
+const catchAsync = require('./../utils/catchAsync');
+const AppError = require('./../utils/appError');
+const pg = require('./../db');
+
+exports.read = catchAsync(async (req, res, next) => {
+  const { username } = req.body;
+
+  var data = await pg.query(`
+    SELECT username,
+            pkuser,
+            useraccount,
+            pay_type,
+            nominal,
+            tanggal::DATE,
+            category,
+            pay_to,
+            pay_to_acc
+    FROM v_transaction WHERE username = '${username}'
+    ORDER BY tanggal DESC`);
+
+    res.status(200).json({
+      status: 'success',
+      message: "Data berhasil!",
+      data : data.rows
+    });
+});
+
+exports.readPieData = catchAsync(async (req, res, next) => {
+    const { username } = req.body;
+  
+    var data = await pg.query(`
+        SELECT username, pay_type, SUM(nominal) as Nominal
+        FROM v_transaction
+        WHERE username = '${username}'
+        GROUP BY username, pay_type;`);
+  
+      res.status(200).json({
+        status: 'success',
+        message: "Data berhasil!",
+        data : data.rows
+      });
+});
+
+exports.insertReceivable = catchAsync(async (req, res, next) => {
+    const { nominal, tanggal, fkuser, pay_to, pay_to_acc  } = req.body;
+  
+    await pg.query(`
+        INSERT INTO t_transaction (
+            category,
+            nominal,
+            tanggal,
+            pay_type,
+            fkuser,
+            pay_to,
+            pay_to_acc
+        )
+        VALUES 
+        ('Receivables', ${nominal}, '${tanggal}'::DATE, 'Receviables', ${fkuser}, '${pay_to}', '${pay_to_acc}'),`);
+  
+      res.status(200).json({
+        status: 'success',
+        message: "Transaksi Receivable Berhasil!",
+      });
+});
+
+exports.insertPayable = catchAsync(async (req, res, next) => {
+    const { nominal, tanggal, fkuser, pay_to, pay_to_acc  } = req.body;
+  
+    await pg.query(`
+        INSERT INTO t_transaction (
+            category,
+            nominal,
+            tanggal,
+            pay_type,
+            fkuser,
+            pay_to,
+            pay_to_acc
+        )
+        VALUES 
+        ('Payable', ${nominal}, '${tanggal}'::DATE, 'Payable', ${fkuser}, '${pay_to}', '${pay_to_acc}'),`);
+  
+      res.status(200).json({
+        status: 'success',
+        message: "Transaksi Payable Berhasil!",
+      });
+});
+
+exports.insertTransaksi = catchAsync(async (req, res, next) => {
+    const { category, nominal, tanggal, fkuser, pay_to, pay_to_acc  } = req.body;
+  
+    await pg.query(`
+        INSERT INTO t_transaction (
+            category,
+            nominal,
+            tanggal,
+            pay_type,
+            fkuser,
+            pay_to,
+            pay_to_acc
+        )
+        VALUES 
+        ('Category', ${nominal}, '${tanggal}'::DATE, 'Expense', ${fkuser}, '${pay_to}', '${pay_to_acc}'),`);
+  
+      res.status(200).json({
+        status: 'success',
+        message: "Transaksi Expense Berhasil!",
+      });
+});
