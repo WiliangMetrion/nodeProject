@@ -1,5 +1,8 @@
 const express = require('express');
 
+const dotenv = require('dotenv');
+dotenv.config()
+
 const AppError = require('./utils/appError');
 const loginRouter = require('./routes/loginRoutes');
 const transaksiRouter = require('./routes/transaksiRoutes');

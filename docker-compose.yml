@@ -6,7 +6,7 @@ services:
     container_name: app_finance_server
     restart: on-failure
     ports:
-      - "${APP_PORT}:3000"
+      - "${APP_PORT_EXT}:${APP_PORT}"
     environment:
       NODE_ENV: development
       PORT: 3000
@@ -20,7 +20,7 @@ services:
     container_name: app_finance_db
     restart: on-failure
     ports:
-      - "${DB_PORT}:5432"
+      - "${DB_PORT_EXT}:${DB_PORT}"
     environment:
       POSTGRES_USER: root
       POSTGRES_PASSWORD: root
