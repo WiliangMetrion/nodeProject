@@ -25,6 +25,29 @@ exports.read = catchAsync(async (req, res, next) => {
     });
 });
 
+exports.readExpense = catchAsync(async (req, res, next) => {
+  const { username } = req.body;
+
+  var data = await pg.query(`
+    SELECT username,
+            pkuser,
+            useraccount,
+            pay_type,
+            nominal,
+            tanggal::DATE,
+            category,
+            pay_to,
+            pay_to_acc
+    FROM v_transaction WHERE username = '${username}' AND pay_type = 'Expense'
+    ORDER BY tanggal DESC`);
+
+    res.status(200).json({
+      status: 'success',
+      message: "Data berhasil!",
+      data : data.rows
+    });
+});
+
 exports.readIncome = catchAsync(async (req, res, next) => {
   const { username } = req.body;
 
@@ -130,15 +153,6 @@ exports.insertReceivable = catchAsync(async (req, res, next) => {
         ('Receivables', ${nominal}, '${tanggal}'::DATE, 'Receviables', ${fkuser}, '${pay_to}', '${pay_to_acc}');
         
         UPDATE users SET saldo = saldo - ${nominal}, receivables = receivables + ${nominal} WHERE pkuser = ${fkuser};
-
-        INSERT INTO m_tujuan (
-          tujuan_name ,
-          tujuan_acc,
-          fkuser,
-          remark
-        )
-        SELECT '${pay_to}' as tujuan_name, '${pay_to_acc}' as tujuan_acc, ${fkuser} as fkuser, '' as remark FROM m_tujuan
-        WHERE NOT EXISTS (SELECT tujuan_name FROM m_tujuan WHERE tujuan_name = '${pay_to}') LIMIT 1 ;
         `);
   
       res.status(200).json({
@@ -165,14 +179,6 @@ exports.insertPayable = catchAsync(async (req, res, next) => {
         
         UPDATE users SET saldo = saldo + ${nominal}, payable = payable + ${nominal} WHERE pkuser = ${fkuser};
 
-        INSERT INTO m_tujuan (
-          tujuan_name ,
-          tujuan_acc,
-          fkuser,
-          remark
-        )
-        SELECT '${pay_to}' as tujuan_name, '${pay_to_acc}' as tujuan_acc, ${fkuser} as fkuser, '' as remark FROM m_tujuan
-        WHERE NOT EXISTS (SELECT tujuan_name FROM m_tujuan WHERE tujuan_name = '${pay_to}') LIMIT 1 ;
         `);
   
       res.status(200).json({
@@ -224,14 +230,6 @@ exports.insertTransaksi = catchAsync(async (req, res, next) => {
         
         UPDATE users SET saldo = saldo - ${nominal}, expense = expense + ${nominal} WHERE pkuser = ${fkuser};
 
-        INSERT INTO m_tujuan (
-          tujuan_name ,
-          tujuan_acc,
-          fkuser,
-          remark
-        )
-        SELECT '${pay_to}' as tujuan_name, '${pay_to_acc}' as tujuan_acc, ${fkuser} as fkuser, '' as remark FROM m_tujuan
-        WHERE NOT EXISTS (SELECT tujuan_name FROM m_tujuan WHERE tujuan_name = '${pay_to}') LIMIT 1 ;
         `);
   
       res.status(200).json({

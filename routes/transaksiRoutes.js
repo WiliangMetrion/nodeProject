@@ -7,6 +7,10 @@ router
   .route('/')
   .post(transaksiController.read);
 
+  router
+  .route('/read/expense')
+  .post(transaksiController.readExpense);
+
 router
   .route('/read/income')
   .post(transaksiController.readIncome);
